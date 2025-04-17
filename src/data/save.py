@@ -1,16 +1,17 @@
+import logging
 import os
 from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
-import logging
 from dotenv import load_dotenv
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO)
 
-def save(df: pd.DataFrame, raw: bool = True, **kwargs):
+def save(df: pd.DataFrame,
+         raw: bool = True,
+         **kwargs):
     # Format dates
     for key in ['start_date', 'end_date']:
         if isinstance(kwargs[key], datetime):

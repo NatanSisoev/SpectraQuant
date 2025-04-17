@@ -1,4 +1,9 @@
+import os
+from pathlib import Path
+
 import click
+import pandas as pd
+
 from data.fetch import fetch
 from data.save import save
 
@@ -33,3 +38,30 @@ def fetch_command(**kwargs):
     if kwargs["save"]:
         filepath = save(df, raw=True, **kwargs)
         print(filepath)
+
+
+@data_commands.command("view")
+@click.argument("filename", type=click.STRING, required=True)
+@click.option("--raw", "-r", is_flag=True)
+def view_command(filename: Path, raw: bool):
+    import plotly.graph_objects as go
+
+    # Read data
+    filedir = Path(os.getenv("DATA_DIR"))
+    filepath = filedir / ("raw" if raw else "processed") / filename
+
+    if not filepath.exists():
+        click.secho(f"File: {filepath} does not exist.\nTry --raw or fetch the data first.", fg="red")
+        return
+
+    df = pd.read_csv(filepath)
+
+    # Plot data
+    fig = go.Figure(data=[go.Candlestick(
+        x=df.index,
+        open=df["open"],
+        high=df["high"],
+        low=df["low"],
+        close=df["close"]
+    )])
+    fig.show()
